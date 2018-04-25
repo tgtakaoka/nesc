@@ -311,10 +311,11 @@ static void output_complex(known_cst c)
   assert(0);
 }
 
-void output_constant(known_cst c)
+void output_constant(known_cst c, asttype asttype)
 /* Requires: (constant_integral(c) || constant_float(c)) &&
 	     type_arithmetic(c->type)
 	     or c denotes a string constant && type_chararray(c->type, FALSE)
+	     or null pointer
    Effects: prints a parsable representable of c to f
  */
 {
@@ -342,6 +343,12 @@ void output_constant(known_cst c)
 	 strings as arguments to generics anyway */
       output_quoted_cs(ddecl->schars);
       output("\"");
+    }
+  else if (type_pointer(t) && is_zero_constant(c) && asttype)
+    {
+      output("(");
+      prt_asttype(asttype);
+      output(")0");
     }
   else
     {
@@ -1537,7 +1544,7 @@ void prt_expression_helper(expression e, int context_priority)
   /* Turned on for debugging sometimes. */
   if (e->cst && constant_integral(e->cst) && type_integral(e->cst->type))
     {
-      output_constant(e->cst);
+      output_constant(e->cst, NULL);
       return;
     }
 #endif
@@ -1678,7 +1685,15 @@ void prt_identifier(identifier e, int context_priority)
 
   set_location(e->location);
   if (decl->kind == decl_constant && decl->substitute)
-    output_constant(decl->value);
+    {
+      declarator d;
+      type_element qualifiers;
+      asttype t;
+      type2ast(unparse_region, e->location, decl->value->type, NULL,
+               &d, &qualifiers);
+      t = new_asttype(unparse_region, e->location, d, qualifiers);
+      output_constant(decl->value, t);
+    }
   else if (decl->kind == decl_error) /* attributes have bad code... */
     output_cstring(e->cstring);
   else
@@ -1718,7 +1733,7 @@ void prt_function_call(function_call e, int context_priority)
 	  output("))");
 	}
       else if (get_magic(e))
-	output_constant(e->cst);
+	output_constant(e->cst, NULL);
       else
 	{
 	  prt_expression(e->arg1, P_CALL);

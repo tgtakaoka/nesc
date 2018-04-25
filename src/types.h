@@ -51,7 +51,7 @@ extern type float_type, double_type, long_double_type,
   int_type, unsigned_int_type, long_type, unsigned_long_type,
   long_long_type, unsigned_long_long_type, short_type, unsigned_short_type,
   char_type, char_array_type, wchar_type, wchar_array_type,
-  unsigned_char_type, signed_char_type, void_type, ptr_void_type,
+  unsigned_char_type, signed_char_type, _Bool_type, void_type, ptr_void_type,
   size_t_type, ptrdiff_t_type, intptr_type, unknown_int_type,
   unknown_number_type, const_ptr_void_type;
 
@@ -175,6 +175,7 @@ bool type_long_double(type t);
 bool type_unknown_number(type t);
 bool type_unknown(type t); /* unknown_int or unknown_number */
 
+void type_print(FILE*, type);
 bool type_tagged(type t);
 bool type_integral(type t);	/* Does not include enum's */
 bool type_floating(type t);
@@ -182,6 +183,7 @@ bool type_complex(type t);
 bool type_float(type t);
 bool type_double(type t);
 bool type_void(type t);
+bool type_Bool(type t);
 bool type_char(type t);
 bool type_function(type t);
 bool type_array(type t);
